@@ -17,7 +17,6 @@ import android.support.v4.widget.DrawerLayout;
 import android.support.v7.widget.Toolbar;
 import android.widget.TextView;
 import android.widget.Toast;
-
 import com.example.foodie.foodie.Common.Common;
 import com.example.foodie.foodie.Interface.ItemClickListener;
 import com.example.foodie.foodie.Model.Category;
@@ -55,8 +54,8 @@ public class Home extends AppCompatActivity
         fab.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View view) {
-                Snackbar.make(view, "Replace with your own action", Snackbar.LENGTH_LONG)
-                        .setAction("Action", null).show();
+              Intent cartIntent = new Intent(Home.this,Cart.class);
+              startActivity(cartIntent);
             }
         });
         setSupportActionBar(toolbar);
