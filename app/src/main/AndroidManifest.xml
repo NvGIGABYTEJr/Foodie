@@ -25,7 +25,9 @@
         <activity android:name=".SignUp" />
         <activity
             android:name=".Home"
-            android:label="@string/title_activity_home"></activity>
+            android:label="@string/title_activity_home" />
+        <activity android:name=".FoodList" />
+        <activity android:name=".FoodDetail"></activity>
     </application>
 
 </manifest>
