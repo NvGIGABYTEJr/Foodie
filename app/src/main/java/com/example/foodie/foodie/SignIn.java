@@ -37,6 +37,10 @@ public class SignIn extends AppCompatActivity{
         btnSignIn.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
+
+                if(Common.isConnectedToInternet(getBaseContext())){
+
+
                 final ProgressDialog mDialog = new ProgressDialog(SignIn.this);
                 mDialog.setMessage("Please Wait");
                 mDialog.show();
@@ -73,6 +77,10 @@ public class SignIn extends AppCompatActivity{
                     }
                 });
 
+            } else{
+                    Toast.makeText(SignIn.this,"Please check your connection !!", Toast.LENGTH_SHORT).show();
+                    return;
+                }
             }
         });
     }

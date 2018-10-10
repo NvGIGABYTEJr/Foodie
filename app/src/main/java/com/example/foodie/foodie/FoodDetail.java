@@ -12,6 +12,7 @@ import android.widget.TextView;
 import android.widget.Toast;
 
 import com.cepheuen.elegantnumberbutton.view.ElegantNumberButton;
+import com.example.foodie.foodie.Common.Common;
 import com.example.foodie.foodie.Database.Database;
 import com.example.foodie.foodie.Model.Food;
 import com.example.foodie.foodie.Model.Order;
@@ -76,7 +77,13 @@ public class FoodDetail extends AppCompatActivity {
             foodId = getIntent().getStringExtra("FoodId");
         }
         if (!foodId.isEmpty()){
-            getDetailFood(foodId);
+
+            if(Common.isConnectedToInternet(getApplicationContext()))
+                getDetailFood(foodId);
+            else{
+                Toast.makeText(FoodDetail.this,"Please check your connection !!", Toast.LENGTH_SHORT).show();
+                return;
+            }
         }
     }
 
