@@ -48,6 +48,34 @@
             app:met_primaryColor="@android:color/white"
             app:met_singleLineEllipsis="true" />
 
+        <LinearLayout
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:orientation="horizontal"
+            android:weightSum="2">
+
+            <com.rey.material.widget.CheckBox
+                android:layout_height="wrap_content"
+                android:layout_width="0dp"
+                style="@style/Material.Drawable.CheckBox"
+                android:text="Remember me"
+                android:layout_weight="1"
+                android:gravity="center_vertical"
+                android:id="@+id/ckbRemember"
+                android:textColor="@android:color/white"
+                app:cbd_strokeColor="@android:color/white"
+                app:cbd_tickColor="@color/colorPrimaryDark" />
+
+            <TextView
+                android:layout_width="0dp"
+                android:layout_height="wrap_content"
+                android:textColor="@android:color/white"
+                android:layout_weight="1"
+                android:id="@+id/txtForgotPwd"
+                android:text="@string/forgot_pwd"/>
+
+        </LinearLayout>
+
 
     </LinearLayout>
 

@@ -14,4 +14,6 @@
 
     <string name="openDrawer">open_drawer</string>
     <string name="closeDrawer">close_drawer</string>
+
+    <string name="forgot_pwd"><u>Forgot Password?</u></string>
 </resources>
