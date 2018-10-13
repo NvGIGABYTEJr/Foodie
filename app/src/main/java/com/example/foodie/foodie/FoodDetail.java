@@ -8,6 +8,7 @@ import android.support.v7.app.AppCompatActivity;
 import android.os.Bundle;
 import android.view.View;
 import android.widget.ImageView;
+import android.widget.RatingBar;
 import android.widget.TextView;
 import android.widget.Toast;
 
@@ -16,25 +17,34 @@ import com.example.foodie.foodie.Common.Common;
 import com.example.foodie.foodie.Database.Database;
 import com.example.foodie.foodie.Model.Food;
 import com.example.foodie.foodie.Model.Order;
+import com.example.foodie.foodie.Model.Rating;
 import com.google.firebase.database.DataSnapshot;
 import com.google.firebase.database.DatabaseError;
 import com.google.firebase.database.DatabaseReference;
 import com.google.firebase.database.FirebaseDatabase;
+import com.google.firebase.database.Query;
 import com.google.firebase.database.ValueEventListener;
 import com.squareup.picasso.Picasso;
+import com.stepstone.apprating.AppRatingDialog;
+import com.stepstone.apprating.listener.RatingDialogListener;
 
-public class FoodDetail extends AppCompatActivity {
+import java.util.Arrays;
+import java.util.Queue;
+
+public class FoodDetail extends AppCompatActivity implements RatingDialogListener{
 
     TextView food_name, food_price, food_description;
     ImageView food_image;
     CollapsingToolbarLayout collapsingToolbarLayout;
-    FloatingActionButton btnCart;
+    FloatingActionButton btnCart,btnRating;
     ElegantNumberButton numberButton;
+    RatingBar ratingBar;
 
     String foodId="";
 
     FirebaseDatabase database;
     DatabaseReference food;
+    DatabaseReference ratingTbl;
 
     Food currentFood;
 
@@ -45,9 +55,20 @@ public class FoodDetail extends AppCompatActivity {
 
         database = FirebaseDatabase.getInstance();
         food = database.getReference("Food");
+        ratingTbl = database.getReference("Rating");
 
         numberButton = (ElegantNumberButton) findViewById(R.id.number_button);
         btnCart = (FloatingActionButton) findViewById(R.id.btnCart);
+        btnRating = (FloatingActionButton) findViewById(R.id.btn_rating);
+        ratingBar = (RatingBar) findViewById(R.id.ratingBar);
+
+         btnRating.setOnClickListener(new View.OnClickListener() {
+             @Override
+             public void onClick(View v) {
+                 showRatingDialog();
+             }
+         });
+
 
         btnCart.setOnClickListener(new View.OnClickListener() {
             @Override
@@ -78,13 +99,33 @@ public class FoodDetail extends AppCompatActivity {
         }
         if (!foodId.isEmpty()){
 
-            if(Common.isConnectedToInternet(getApplicationContext()))
+            if(Common.isConnectedToInternet(getApplicationContext())) {
                 getDetailFood(foodId);
+                getRatingFood(foodId);
+            }
             else{
                 Toast.makeText(FoodDetail.this,"Please check your connection !!", Toast.LENGTH_SHORT).show();
                 return;
             }
         }
+    }
+
+    private void showRatingDialog(){
+         new AppRatingDialog.Builder()
+                 .setPositiveButtonText("Submit")
+                 .setNegativeButtonText("Cancel")
+                 .setNoteDescriptions(Arrays.asList("Very Bad","Not Good","Quite Ok","Very Good","Excellent"))
+                 .setDefaultRating(1)
+                 .setTitle("Rate this food")
+                 .setDescription("Please give your rating and feedback")
+                 .setTitleTextColor(R.color.colorPrimary)
+                 .setDescriptionTextColor(R.color.colorPrimary)
+                 .setHint("Please write your feedback here...")
+                 .setCommentTextColor(android.R.color.white)
+                 .setCommentBackgroundColor(R.color.colorPrimary)
+                 .setWindowAnimation(R.style.RatingDialogFadeAnimation)
+                 .create(FoodDetail.this)
+                 .show();
     }
 
     private void getDetailFood(String foodId){
@@ -107,5 +148,62 @@ public class FoodDetail extends AppCompatActivity {
 
             }
         });
+    }
+
+    private void getRatingFood(String foodId){
+        com.google.firebase.database.Query foodRating = ratingTbl.orderByChild("foodId").equalTo(foodId);
+        foodRating.addValueEventListener(new ValueEventListener() {
+            int count=0,sum=0;
+            @Override
+            public void onDataChange(@NonNull DataSnapshot dataSnapshot) {
+                for(DataSnapshot postSnapshot:dataSnapshot.getChildren()){
+                    Rating item = postSnapshot.getValue(Rating.class);
+                    sum+=Integer.parseInt(item.getRateValue());
+                    count++;
+                }
+                if(count != 0){
+                    float average = sum/count;
+                    ratingBar.setRating(average);
+                }
+            }
+
+            @Override
+            public void onCancelled(@NonNull DatabaseError databaseError) {
+
+            }
+        });
+    }
+
+    @Override
+    public void onPositiveButtonClicked(int value, String comments) {
+        final Rating rating = new Rating(Common.currentUser.getPhone(),
+                foodId,
+                String.valueOf(value),
+                comments);
+        ratingTbl.child(Common.currentUser.getPhone()).addValueEventListener(new ValueEventListener() {
+            @Override
+            public void onDataChange(@NonNull DataSnapshot dataSnapshot) {
+                if(dataSnapshot.child(Common.currentUser.getPhone()).exists()){
+
+                    ratingTbl.child(Common.currentUser.getPhone()).removeValue();
+                    ratingTbl.child(Common.currentUser.getPhone()).setValue(rating);
+                }
+                else{
+                    ratingTbl.child(Common.currentUser.getPhone()).setValue(rating);
+                }
+
+                Toast.makeText(FoodDetail.this,"Thank you for your feedback !!!",Toast.LENGTH_SHORT).show();
+            }
+
+            @Override
+            public void onCancelled(@NonNull DatabaseError databaseError) {
+
+            }
+        });
+    }
+
+    @Override
+    public void onNegativeButtonClicked() {
+
     }
 }

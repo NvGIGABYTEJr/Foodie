@@ -20,10 +20,12 @@ import android.widget.Toast;
 import com.example.foodie.foodie.Common.Common;
 import com.example.foodie.foodie.Interface.ItemClickListener;
 import com.example.foodie.foodie.Model.Category;
+import com.example.foodie.foodie.Model.Token;
 import com.example.foodie.foodie.ViewHolder.MenuViewHolder;
 import com.firebase.ui.database.FirebaseRecyclerAdapter;
 import com.google.firebase.database.DatabaseReference;
 import com.google.firebase.database.FirebaseDatabase;
+import com.google.firebase.iid.FirebaseInstanceId;
 import com.squareup.picasso.Picasso;
 
 import io.paperdb.Paper;
@@ -104,8 +106,16 @@ public class Home extends AppCompatActivity
             return;
         }
 
+        updateToken(FirebaseInstanceId.getInstance().getToken());
+
     }
 
+    private void updateToken(String token){
+        FirebaseDatabase db = FirebaseDatabase.getInstance();
+        DatabaseReference tokens = db.getReference("Tokens");
+        Token data = new Token(token,false);
+        tokens.child(Common.currentUser.getPhone()).setValue(data);
+    }
     private void loadMenu(){
         adapter = new FirebaseRecyclerAdapter<Category, MenuViewHolder>(Category.class, R.layout.menu_item,MenuViewHolder.class,category) {
             @Override
