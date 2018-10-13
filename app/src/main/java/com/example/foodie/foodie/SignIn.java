@@ -79,7 +79,7 @@ public class SignIn extends AppCompatActivity{
                 mDialog.setMessage("Please Wait");
                 mDialog.show();
 
-                table_user.addValueEventListener(new ValueEventListener() {
+                table_user.addListenerForSingleValueEvent(new ValueEventListener() {
                     @Override
                     public void onDataChange(@NonNull DataSnapshot dataSnapshot) {
 
@@ -95,6 +95,8 @@ public class SignIn extends AppCompatActivity{
                                 startActivity(homeIntent);
                                 Toast.makeText(SignIn.this, "Sign In Successful !", Toast.LENGTH_SHORT).show();
                                 finish();
+
+                                table_user.removeEventListener(this);
 
                             } else {
                                 Toast.makeText(SignIn.this, "Sign In Failed !", Toast.LENGTH_SHORT).show();
