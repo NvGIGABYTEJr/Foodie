@@ -20,7 +20,9 @@ android {
 
 dependencies {
     implementation fileTree(dir: 'libs', include: ['*.jar'])
+    implementation ('com.facebook.android:facebook-share:[4,5)')
     implementation 'com.google.firebase:firebase-messaging:17.3.3'
+    implementation 'com.paypal.sdk:paypal-android-sdk:2.15.3'
     implementation 'com.github.d-max:spots-dialog:0.7@aar'
     implementation 'com.github.mancj:MaterialSearchBar:0.7.1'
     implementation 'com.stepstone.apprating:app-rating:2.0.0'

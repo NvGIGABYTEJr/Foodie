@@ -10,6 +10,7 @@ import android.support.design.widget.FloatingActionButton;
 import android.support.design.widget.NavigationView;
 import android.support.design.widget.Snackbar;
 import android.support.v4.view.GravityCompat;
+import android.support.v4.widget.SwipeRefreshLayout;
 import android.support.v7.app.ActionBarDrawerToggle;
 import android.support.v7.app.AppCompatActivity;
 import android.support.v7.widget.LinearLayoutManager;
@@ -56,6 +57,8 @@ public class Home extends AppCompatActivity
 
     FirebaseRecyclerAdapter<Category,MenuViewHolder> adapter;
 
+    SwipeRefreshLayout swipeRefreshLayout;
+
     FloatingActionButton fab;
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -76,6 +79,36 @@ public class Home extends AppCompatActivity
             }
         });
         setSupportActionBar(toolbar);
+
+        swipeRefreshLayout = (SwipeRefreshLayout)findViewById(R.id.swipe_layout);
+        swipeRefreshLayout.setColorSchemeResources(R.color.colorPrimary,
+                android.R.color.holo_green_dark,
+                android.R.color.holo_orange_dark,
+                android.R.color.holo_blue_dark);
+        swipeRefreshLayout.setOnRefreshListener(new SwipeRefreshLayout.OnRefreshListener() {
+            @Override
+            public void onRefresh() {
+                if (Common.isConnectedToInternet(getBaseContext()))
+                    loadMenu();
+                else {
+                    Toast.makeText(getBaseContext(), "Please check your connection !!", Toast.LENGTH_SHORT).show();
+                    return;
+                }
+            }
+        });
+
+        //Default, load for first time
+        swipeRefreshLayout.post(new Runnable() {
+            @Override
+            public void run() {
+                if (Common.isConnectedToInternet(getBaseContext()))
+                    loadMenu();
+                else {
+                    Toast.makeText(getBaseContext(), "Please check your connection !!", Toast.LENGTH_SHORT).show();
+                    return;
+                }
+            }
+        });
 
 
         DrawerLayout drawer = (DrawerLayout) findViewById(R.id.drawer_layout);
@@ -112,13 +145,6 @@ public class Home extends AppCompatActivity
         layoutManager = new LinearLayoutManager(this);
         recycler_menu.setLayoutManager(layoutManager);
 
-        if (Common.isConnectedToInternet(this))
-            loadMenu();
-        else {
-            Toast.makeText(this, "Please check your connection !!", Toast.LENGTH_SHORT).show();
-            return;
-        }
-
         updateToken(FirebaseInstanceId.getInstance().getToken());
 
     }
@@ -147,6 +173,7 @@ public class Home extends AppCompatActivity
             }
         };
         recycler_menu.setAdapter(adapter);
+        swipeRefreshLayout.setRefreshing(false);
     }
 
     @Override

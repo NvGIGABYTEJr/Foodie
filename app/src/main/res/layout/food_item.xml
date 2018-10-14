@@ -31,10 +31,18 @@
                 android:layout_height="wrap_content"
                 android:id="@+id/food_name"
                 android:text="Name of food"
-                android:layout_weight="9"
+                android:layout_weight="8"
                 android:textSize="20sp"
                 android:gravity="center"
                 android:textColor="@android:color/white"/>
+            
+            <ImageView
+                android:id="@+id/btnShare"
+                android:layout_weight="1"
+                android:src="@drawable/ic_share_black_24dp"
+                android:tint="@android:color/white"
+                android:layout_width="0dp"
+                android:layout_height="wrap_content" />
             
             <ImageView
                 android:layout_width="0dp"
