@@ -1,5 +1,8 @@
 # Foodie
-This is a food app
+This Foodie apps is for user to order food and trace the location of the shipper, 
+User also able to do payment via paypal 
+
+P.S. For UTP use only 
 
 # Compilation Instruction
 Git Clone the android source code
