@@ -1,6 +1,7 @@
 package com.example.foodie.foodie;
 
 import android.content.Context;
+import android.content.Intent;
 import android.provider.ContactsContract;
 import android.support.annotation.NonNull;
 import android.support.design.widget.CollapsingToolbarLayout;
@@ -8,17 +9,21 @@ import android.support.design.widget.FloatingActionButton;
 import android.support.v7.app.AppCompatActivity;
 import android.os.Bundle;
 import android.view.View;
+import android.widget.Button;
 import android.widget.ImageView;
 import android.widget.RatingBar;
 import android.widget.TextView;
 import android.widget.Toast;
 
+import com.andremion.counterfab.CounterFab;
 import com.cepheuen.elegantnumberbutton.view.ElegantNumberButton;
 import com.example.foodie.foodie.Common.Common;
 import com.example.foodie.foodie.Database.Database;
 import com.example.foodie.foodie.Model.Food;
 import com.example.foodie.foodie.Model.Order;
 import com.example.foodie.foodie.Model.Rating;
+import com.google.android.gms.tasks.OnCompleteListener;
+import com.google.android.gms.tasks.Task;
 import com.google.firebase.database.DataSnapshot;
 import com.google.firebase.database.DatabaseError;
 import com.google.firebase.database.DatabaseReference;
@@ -40,7 +45,8 @@ public class FoodDetail extends AppCompatActivity implements RatingDialogListene
     TextView food_name, food_price, food_description;
     ImageView food_image;
     CollapsingToolbarLayout collapsingToolbarLayout;
-    FloatingActionButton btnCart,btnRating;
+    FloatingActionButton btnRating;
+    CounterFab btnCart;
     ElegantNumberButton numberButton;
     RatingBar ratingBar;
 
@@ -49,6 +55,8 @@ public class FoodDetail extends AppCompatActivity implements RatingDialogListene
     FirebaseDatabase database;
     DatabaseReference food;
     DatabaseReference ratingTbl;
+
+    Button btnShowComment;
 
     Food currentFood;
 
@@ -67,12 +75,23 @@ public class FoodDetail extends AppCompatActivity implements RatingDialogListene
                 .build());
         setContentView(R.layout.activity_food_detail);
 
+        btnShowComment = (Button)findViewById(R.id.btnShowComment);
+        btnShowComment.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                Intent intent = new Intent(FoodDetail.this,ShowComment.class);
+                intent.putExtra(Common.INTENT_FOOD_ID,foodId);
+                startActivity(intent);
+            }
+        });
+
+
         database = FirebaseDatabase.getInstance();
         food = database.getReference("Food");
         ratingTbl = database.getReference("Rating");
 
         numberButton = (ElegantNumberButton) findViewById(R.id.number_button);
-        btnCart = (FloatingActionButton) findViewById(R.id.btnCart);
+        btnCart = (CounterFab) findViewById(R.id.btnCart);
         btnRating = (FloatingActionButton) findViewById(R.id.btn_rating);
         ratingBar = (RatingBar) findViewById(R.id.ratingBar);
 
@@ -92,12 +111,15 @@ public class FoodDetail extends AppCompatActivity implements RatingDialogListene
                         currentFood.getName(),
                         numberButton.getNumber(),
                         currentFood.getPrice(),
-                        currentFood.getDiscount()
+                        currentFood.getDiscount(),
+                        currentFood.getImage()
                 ));
 
                 Toast.makeText(FoodDetail.this,"Added to Cart",Toast.LENGTH_SHORT).show();
             }
         });
+
+        btnCart.setCount(new Database(this).getCountCart());
 
         food_description = (TextView) findViewById(R.id.food_description);
         food_name = (TextView) findViewById(R.id.food_name);
@@ -194,6 +216,17 @@ public class FoodDetail extends AppCompatActivity implements RatingDialogListene
                 foodId,
                 String.valueOf(value),
                 comments);
+
+        //fix user can rate multiple times
+        ratingTbl.push()
+                .setValue(rating)
+                .addOnCompleteListener(new OnCompleteListener<Void>() {
+                    @Override
+                    public void onComplete(@NonNull Task<Void> task) {
+                        Toast.makeText(FoodDetail.this,"Thank you for your feedback !!!",Toast.LENGTH_SHORT).show();
+                    }
+                });
+        /*
         ratingTbl.child(Common.currentUser.getPhone()).addValueEventListener(new ValueEventListener() {
             @Override
             public void onDataChange(@NonNull DataSnapshot dataSnapshot) {
@@ -213,7 +246,7 @@ public class FoodDetail extends AppCompatActivity implements RatingDialogListene
             public void onCancelled(@NonNull DatabaseError databaseError) {
 
             }
-        });
+        });*/
     }
 
     @Override

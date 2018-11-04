@@ -29,7 +29,10 @@ import android.view.animation.AnimationUtils;
 import android.view.animation.LayoutAnimationController;
 import android.widget.TextView;
 import android.widget.Toast;
+
+import com.andremion.counterfab.CounterFab;
 import com.example.foodie.foodie.Common.Common;
+import com.example.foodie.foodie.Database.Database;
 import com.example.foodie.foodie.Interface.ItemClickListener;
 import com.example.foodie.foodie.Model.Category;
 import com.example.foodie.foodie.Model.Token;
@@ -68,7 +71,7 @@ public class Home extends AppCompatActivity
 
     SwipeRefreshLayout swipeRefreshLayout;
 
-    FloatingActionButton fab;
+    CounterFab fab;
 
     @Override
     protected void attachBaseContext(Context newBase) {
@@ -85,7 +88,7 @@ public class Home extends AppCompatActivity
         setContentView(R.layout.activity_home);
         Toolbar toolbar = (Toolbar) findViewById(R.id.toolbar);
         toolbar.setTitle("Menu");
-        fab = (FloatingActionButton) findViewById(R.id.fab);
+        fab = (CounterFab) findViewById(R.id.fab);
 
         database = FirebaseDatabase.getInstance();
         category = database.getReference("Category");
@@ -127,6 +130,9 @@ public class Home extends AppCompatActivity
                 startActivity(cartIntent);
             }
         });
+
+        fab.setCount(new Database(this).getCountCart());
+
         setSupportActionBar(toolbar);
 
         swipeRefreshLayout = (SwipeRefreshLayout)findViewById(R.id.swipe_layout);
@@ -205,6 +211,16 @@ public class Home extends AppCompatActivity
         Token data = new Token(token,false);
         tokens.child(Common.currentUser.getPhone()).setValue(data);
     }
+
+    @Override
+    protected void onResume() {
+        super.onResume();
+        fab.setCount(new Database(this).getCountCart());
+
+        if(adapter != null)
+            adapter.startListening();
+    }
+
     private void loadMenu(){
         adapter.startListening();
         recycler_menu.setAdapter(adapter);
@@ -266,12 +282,49 @@ public class Home extends AppCompatActivity
             startActivity(signIn);
         } else if (id == R.id.nav_change_pwd){
             showChangePasswordDialog();
+        } else if (id == R.id.nav_home_address){
+            showHomeAddressDialog();
         }
 
         DrawerLayout drawer = (DrawerLayout) findViewById(R.id.drawer_layout);
         drawer.closeDrawer(GravityCompat.START);
         return true;
 
+    }
+
+    private void showHomeAddressDialog() {
+        AlertDialog.Builder alertDialog = new AlertDialog.Builder(Home.this);
+        alertDialog.setTitle("CHANGE HOME ADDRESS");
+        alertDialog.setMessage("Please fill all information");
+
+        LayoutInflater inflater = LayoutInflater.from(this);
+        View layout_home = inflater.inflate(R.layout.home_address_layout,null);
+
+        final MaterialEditText edtHomeAddress = (MaterialEditText)layout_home.findViewById(R.id.edtHomeAddress);
+
+        alertDialog.setView(layout_home);
+
+        alertDialog.setPositiveButton("UPDATE", new DialogInterface.OnClickListener() {
+            @Override
+            public void onClick(DialogInterface dialog, int which) {
+                dialog.dismiss();
+
+                //Set new home address
+                Common.currentUser.setHomeAddress(edtHomeAddress.getText().toString());
+
+                FirebaseDatabase.getInstance().getReference("User")
+                        .child(Common.currentUser.getPhone())
+                        .setValue(Common.currentUser)
+                        .addOnCompleteListener(new OnCompleteListener<Void>() {
+                            @Override
+                            public void onComplete(@NonNull Task<Void> task) {
+                                Toast.makeText(Home.this,"Update Password Successful",Toast.LENGTH_SHORT).show();
+                            }
+                        }) ;
+            }
+        });
+
+        alertDialog.show();
     }
 
     private void showChangePasswordDialog(){

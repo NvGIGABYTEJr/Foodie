@@ -15,20 +15,11 @@
             android:layout_height="wrap_content"
             android:padding="16dp">
 
-            <com.rengwuxian.materialedittext.MaterialEditText
-            android:id="@+id/edtAddress"
-            android:hint="Address"
-            android:textColorHint="@color/colorPrimary"
-            android:text=""
-            android:inputType="text"
-            android:textColor="@color/colorPrimary"
-            android:textSize="34sp"
-            android:layout_width="match_parent"
-            android:layout_height="wrap_content"
-            app:met_baseColor="@color/colorPrimary"
-            app:met_floatingLabel="highlight"
-            app:met_primaryColor="@color/colorPrimary"
-            app:met_singleLineEllipsis="true"/>
+            <fragment
+                android:id="@+id/place_autocomplete_fragment"
+                android:name="com.google.android.gms.location.places.ui.PlaceAutocompleteFragment"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"/>
 
             <com.rengwuxian.materialedittext.MaterialEditText
                 android:id="@+id/edtComment"
@@ -44,6 +35,23 @@
                 app:met_floatingLabel="highlight"
                 app:met_primaryColor="@color/colorPrimary"
                 app:met_singleLineEllipsis="true"/>
+            
+            <RadioGroup
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content">
+                
+                <RadioButton
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:text="Ship To This Address"
+                    android:id="@+id/rdiShipToAddress"/>
+
+                <RadioButton
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:text="Ship To Home Address"
+                    android:id="@+id/rdiHomeAddress"/>
+            </RadioGroup>
 
         </LinearLayout>
 
