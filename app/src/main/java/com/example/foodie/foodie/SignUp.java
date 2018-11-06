@@ -28,17 +28,8 @@ public class SignUp extends AppCompatActivity {
     Button btnSignUp;
 
     @Override
-    protected void attachBaseContext(Context newBase) {
-        super.attachBaseContext(CalligraphyContextWrapper.wrap(newBase));
-    }
-
-    @Override
     protected void onCreate(@Nullable Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
-        CalligraphyConfig.initDefault(new CalligraphyConfig.Builder()
-                .setDefaultFontPath("fonts/KGSkinnyLatte.ttf")
-                .setFontAttrId(R.attr.fontPath)
-                .build());
         setContentView(R.layout.activity_sign_up);
 
         btnSignUp = (Button)findViewById(R.id.btnSignUp);

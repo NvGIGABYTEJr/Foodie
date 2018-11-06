@@ -6,6 +6,7 @@ import android.net.NetworkInfo;
 
 import com.example.foodie.foodie.Model.User;
 import com.example.foodie.foodie.Remote.APIService;
+import com.example.foodie.foodie.Remote.GoogleRetrofitClient;
 import com.example.foodie.foodie.Remote.IGoogleService;
 import com.example.foodie.foodie.Remote.RetrofitClient;
 
@@ -24,7 +25,7 @@ public class Common {
     }
 
     public static IGoogleService getGoogleMapAPI(){
-        return RetrofitClient.getClient(GOOGLE_API_URL).create(IGoogleService.class);
+        return GoogleRetrofitClient.getGoogleClient(GOOGLE_API_URL).create(IGoogleService.class);
     }
 
     public static final String DELETE="Delete";

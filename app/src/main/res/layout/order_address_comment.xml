@@ -35,22 +35,63 @@
                 app:met_floatingLabel="highlight"
                 app:met_primaryColor="@color/colorPrimary"
                 app:met_singleLineEllipsis="true"/>
-            
-            <RadioGroup
+
+            <TextView
+                android:text="Delivery method"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content" />
+
+            <com.rey.material.widget.CheckBox
+                android:layout_height="wrap_content"
+                android:layout_width="match_parent"
+                style="@style/Material.Drawable.CheckBox"
+                android:gravity="center_vertical"
+                android:text="Ship to Home Address"
+                android:id="@+id/rdiHomeAddress"
+                android:textColor="@android:color/black"
+                app:cbd_strokeColor="@android:color/black"
+                app:cbd_tickColor="@android:color/white" />
+
+<!--            <RadioGroup
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content">
+
+
                 
-                <RadioButton
+&lt;!&ndash;                <RadioButton
                     android:layout_width="match_parent"
                     android:layout_height="wrap_content"
                     android:text="Ship To This Address"
-                    android:id="@+id/rdiShipToAddress"/>
+                    android:id="@+id/rdiShipToAddress"/>&ndash;&gt;
+
+&lt;!&ndash;                <RadioButton
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:text="Ship To Home Address"
+                    android:id="@+id/rdiHomeAddress"/>&ndash;&gt;
+            </RadioGroup>-->
+
+            <TextView
+                android:text="Payment method"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content" />
+
+            <RadioGroup
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content">
 
                 <RadioButton
                     android:layout_width="match_parent"
                     android:layout_height="wrap_content"
-                    android:text="Ship To Home Address"
-                    android:id="@+id/rdiHomeAddress"/>
+                    android:text="Cash on Delivery"
+                    android:id="@+id/rdiCOD"/>
+
+                <RadioButton
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:text="Paypal"
+                    android:id="@+id/rdiPaypal"/>
+
             </RadioGroup>
 
         </LinearLayout>

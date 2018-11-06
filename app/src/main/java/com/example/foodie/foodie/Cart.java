@@ -62,6 +62,7 @@ import com.paypal.android.sdk.payments.PayPalService;
 import com.paypal.android.sdk.payments.PaymentActivity;
 import com.paypal.android.sdk.payments.PaymentConfirmation;
 import com.rengwuxian.materialedittext.MaterialEditText;
+import com.rey.material.widget.CheckBox;
 
 import org.json.JSONArray;
 import org.json.JSONException;
@@ -96,7 +97,7 @@ public class Cart extends AppCompatActivity implements GoogleApiClient.Connectio
 
     CartAdapter adapter;
 
-    APIService mService;
+
 
     Place shippingAddress;
 
@@ -113,6 +114,7 @@ public class Cart extends AppCompatActivity implements GoogleApiClient.Connectio
 
     //Declare Google Map API Retrofit
     IGoogleService mGoogleMapService;
+    APIService mService;
 
     @Override
     protected void attachBaseContext(Context newBase) {
@@ -250,10 +252,14 @@ public class Cart extends AppCompatActivity implements GoogleApiClient.Connectio
         final MaterialEditText edtComment = (MaterialEditText)order_address_comment.findViewById(R.id.edtComment);
 
         //Radio Group
-        final RadioButton rdiShipToAddress = (RadioButton) order_address_comment.findViewById(R.id.rdiShipToAddress);
-        final RadioButton rdiHomeAddress = (RadioButton) order_address_comment.findViewById(R.id.rdiHomeAddress);
+        //final RadioButton rdiShipToAddress = (RadioButton) order_address_comment.findViewById(R.id.rdiShipToAddress);
+        //final RadioButton rdiHomeAddress = (RadioButton) order_address_comment.findViewById(R.id.rdiHomeAddress);
+        final RadioButton rdiCOD = (RadioButton) order_address_comment.findViewById(R.id.rdiCOD);
+        final RadioButton rdiPaypal = (RadioButton) order_address_comment.findViewById(R.id.rdiPaypal);
 
-        //Event Radio
+        //Checkbox
+        final CheckBox rdiHomeAddress = (CheckBox) order_address_comment.findViewById(R.id.rdiHomeAddress);
+        //Event Radio||Checkbox
         rdiHomeAddress.setOnCheckedChangeListener(new CompoundButton.OnCheckedChangeListener() {
             @Override
             public void onCheckedChanged(CompoundButton buttonView, boolean isChecked) {
@@ -268,10 +274,14 @@ public class Cart extends AppCompatActivity implements GoogleApiClient.Connectio
                        Toast.makeText(Cart.this,"Please update your home address",Toast.LENGTH_SHORT).show();
                    }
                 }
+                else{
+                    ((EditText)edtAddress.getView().findViewById(R.id.place_autocomplete_search_input))
+                            .getText().clear();
+                }
             }
         });
 
-        rdiShipToAddress.setOnCheckedChangeListener(new CompoundButton.OnCheckedChangeListener() {
+/*        rdiShipToAddress.setOnCheckedChangeListener(new CompoundButton.OnCheckedChangeListener() {
             @Override
             public void onCheckedChanged(CompoundButton buttonView, boolean isChecked) {
                 if(isChecked && (mLastLocation!= null)){//isChecked==true
@@ -303,7 +313,7 @@ public class Cart extends AppCompatActivity implements GoogleApiClient.Connectio
                             });
                 }
             }
-        });
+        });*/
 
         alertDialog.setView(order_address_comment);
         alertDialog.setIcon(R.drawable.ic_shopping_cart_black_24dp);
@@ -316,7 +326,7 @@ public class Cart extends AppCompatActivity implements GoogleApiClient.Connectio
                 //If user select address from Place fragment, just use it
                 //If user select ship to address, get address from location and use it
                 //if user select home address, get home address from profile and use it
-                if(!rdiShipToAddress.isChecked() && !rdiHomeAddress.isChecked()){
+                if(!rdiHomeAddress.isChecked() /*&& !rdiShipToAddress.isChecked()*/){
                     if(shippingAddress != null){
                         address = shippingAddress.getAddress().toString();
                     }
@@ -337,28 +347,64 @@ public class Cart extends AppCompatActivity implements GoogleApiClient.Connectio
                             .commit();
                     return;
                 }
-
                 address = shippingAddress.getAddress().toString();
                 comment = edtComment.getText().toString();
 
-                String formatAmount = txtTotalPrice.getText().toString()
-                        .replace("RM","")
-                        .replace(",","");
-                PayPalPayment payPalPayment = new PayPalPayment(new BigDecimal(formatAmount),
-                        "MYR",
-                        "Foodie App Order",
-                        PayPalPayment.PAYMENT_INTENT_SALE);
-                Intent intent = new Intent(getApplicationContext(), PaymentActivity.class);
-                intent.putExtra(PayPalService.EXTRA_PAYPAL_CONFIGURATION,config);
-                intent.putExtra(PaymentActivity.EXTRA_PAYMENT,payPalPayment);
-                startActivityForResult(intent,PAYPAL_REQUEST_CODE);
+                //Check payment method
+                if (!rdiCOD.isChecked() && !rdiPaypal.isChecked()){
+                    Toast.makeText(Cart.this,"Please select payment option",Toast.LENGTH_SHORT).show();
+                    getFragmentManager().beginTransaction()
+                            .remove(getFragmentManager().findFragmentById(R.id.place_autocomplete_fragment))
+                            .commit();
+                    return;
+                } else if (rdiPaypal.isChecked()){
+                    String formatAmount = txtTotalPrice.getText().toString()
+                            .replace("RM","")
+                            .replace(",","");
+                    PayPalPayment payPalPayment = new PayPalPayment(new BigDecimal(formatAmount),
+                            "MYR",
+                            "Foodie App Order",
+                            PayPalPayment.PAYMENT_INTENT_SALE);
+                    Intent intent = new Intent(getApplicationContext(), PaymentActivity.class);
+                    intent.putExtra(PayPalService.EXTRA_PAYPAL_CONFIGURATION,config);
+                    intent.putExtra(PaymentActivity.EXTRA_PAYMENT,payPalPayment);
+                    startActivityForResult(intent,PAYPAL_REQUEST_CODE);
+                } else if (rdiCOD.isChecked()){
+                    Request request = new Request (
+                            Common.currentUser.getPhone(),
+                            Common.currentUser.getName(),
+                            address,
+                            txtTotalPrice.getText().toString(),
+                            "0",
+                            comment,
+                            "COD",
+                            "Unpaid",
+                            String.format("%s,%s",shippingAddress.getLatLng().latitude,shippingAddress.getLatLng().longitude),
+                            cart
+                    );
+                    //Submit to Firebase
+                    //We will using System.CurrenMilli as key
+                    String order_number = String.valueOf(System.currentTimeMillis());
+                    requests.child(order_number)
+                            .setValue(request);
+                    //Delete Cart
+                    new Database(getBaseContext()).cleanCart();
+                    sendNotificationOrder(order_number);
+
+                    Toast.makeText(Cart.this, "Thank you, Order Placed", Toast.LENGTH_SHORT).show();
+                    finish();
+                }
+
+
+
+
 
                 //remove fragment
-/*
+
                 getFragmentManager().beginTransaction()
                         .remove(getFragmentManager().findFragmentById(R.id.place_autocomplete_fragment))
                         .commit();
-*/
+
 
 
             }
@@ -412,6 +458,7 @@ public class Cart extends AppCompatActivity implements GoogleApiClient.Connectio
                                 txtTotalPrice.getText().toString(),
                                 "0",
                                 comment,
+                                "Paypal",
                                 jsonObject.getJSONObject("response").getString("state"),
                                 String.format("%s,%s",shippingAddress.getLatLng().latitude,shippingAddress.getLatLng().longitude),
                                 cart
