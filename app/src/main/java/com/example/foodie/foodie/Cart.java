@@ -30,11 +30,10 @@ import android.widget.Toast;
 import com.example.foodie.foodie.Common.Common;
 import com.example.foodie.foodie.Common.Config;
 import com.example.foodie.foodie.Database.Database;
+import com.example.foodie.foodie.Model.DataMessage;
 import com.example.foodie.foodie.Model.MyResponse;
-import com.example.foodie.foodie.Model.Notification;
 import com.example.foodie.foodie.Model.Order;
 import com.example.foodie.foodie.Model.Request;
-import com.example.foodie.foodie.Model.Sender;
 import com.example.foodie.foodie.Model.Token;
 import com.example.foodie.foodie.Remote.APIService;
 import com.example.foodie.foodie.Remote.IGoogleService;
@@ -47,7 +46,6 @@ import com.google.android.gms.location.LocationListener;
 import com.google.android.gms.location.LocationRequest;
 import com.google.android.gms.location.LocationServices;
 import com.google.android.gms.location.places.Place;
-import com.google.android.gms.location.places.ui.PlaceAutocomplete;
 import com.google.android.gms.location.places.ui.PlaceAutocompleteFragment;
 import com.google.android.gms.location.places.ui.PlaceSelectionListener;
 import com.google.firebase.database.DataSnapshot;
@@ -56,6 +54,7 @@ import com.google.firebase.database.DatabaseReference;
 import com.google.firebase.database.FirebaseDatabase;
 import com.google.firebase.database.Query;
 import com.google.firebase.database.ValueEventListener;
+import com.google.gson.Gson;
 import com.paypal.android.sdk.payments.PayPalConfiguration;
 import com.paypal.android.sdk.payments.PayPalPayment;
 import com.paypal.android.sdk.payments.PayPalService;
@@ -64,15 +63,16 @@ import com.paypal.android.sdk.payments.PaymentConfirmation;
 import com.rengwuxian.materialedittext.MaterialEditText;
 import com.rey.material.widget.CheckBox;
 
-import org.json.JSONArray;
 import org.json.JSONException;
 import org.json.JSONObject;
 
 import java.math.BigDecimal;
 import java.text.NumberFormat;
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.List;
 import java.util.Locale;
+import java.util.Map;
 
 import retrofit2.Call;
 import retrofit2.Callback;
@@ -388,7 +388,7 @@ public class Cart extends AppCompatActivity implements GoogleApiClient.Connectio
                     requests.child(order_number)
                             .setValue(request);
                     //Delete Cart
-                    new Database(getBaseContext()).cleanCart();
+                    new Database(getBaseContext()).cleanCart(Common.currentUser.getPhone());
                     sendNotificationOrder(order_number);
 
                     Toast.makeText(Cart.this, "Thank you, Order Placed", Toast.LENGTH_SHORT).show();
@@ -469,7 +469,7 @@ public class Cart extends AppCompatActivity implements GoogleApiClient.Connectio
                         requests.child(order_number)
                                 .setValue(request);
                         //Delete Cart
-                        new Database(getBaseContext()).cleanCart();
+                        new Database(getBaseContext()).cleanCart(Common.currentUser.getPhone());
                         sendNotificationOrder(order_number);
 
                         Toast.makeText(Cart.this, "Thank you, Order Placed", Toast.LENGTH_SHORT).show();
@@ -497,10 +497,17 @@ public class Cart extends AppCompatActivity implements GoogleApiClient.Connectio
                 for(DataSnapshot postSnapshot:dataSnapshot.getChildren()){
                     Token serverToken = postSnapshot.getValue(Token.class);
 
-                    Notification notification = new Notification("Foodie","You have new order"+order_number);
-                    Sender content = new Sender(serverToken.getToken(),notification);
+/*                    Notification notification = new Notification("Foodie","You have new order"+order_number);
+                    Sender content = new Sender(serverToken.getToken(),notification);*/
+                    Map<String,String> dataSend = new HashMap<>();
+                    dataSend.put("title","UTP");
+                    dataSend.put("message","You have new order" + order_number);
+                    DataMessage dataMessage = new DataMessage(serverToken.getToken(),dataSend);
 
-                    mService.sendNotification(content)
+                    String test = new Gson().toJson(dataMessage);
+                    Log.d("Content",test);
+
+                    mService.sendNotification(dataMessage)
                             .enqueue(new Callback<MyResponse>() {
                                 @Override
                                 public void onResponse(Call<MyResponse> call, Response<MyResponse> response) {
@@ -531,7 +538,7 @@ public class Cart extends AppCompatActivity implements GoogleApiClient.Connectio
     }
 
     private void loadListFood(){
-        cart = new Database(this).getCarts();
+        cart = new Database(this).getCarts(Common.currentUser.getPhone());
         adapter = new CartAdapter(cart,this);
         adapter.notifyDataSetChanged();
         recyclerView.setAdapter(adapter);
@@ -555,7 +562,7 @@ public class Cart extends AppCompatActivity implements GoogleApiClient.Connectio
 
     private void deleteCart(int position){
         cart.remove(position);
-        new Database(this).cleanCart();
+        new Database(this).cleanCart(Common.currentUser.getPhone());
 
         for(Order item:cart){
             new Database(this).addToCart(item);

@@ -1,7 +1,7 @@
 package com.example.foodie.foodie.Model;
 
 public class Order {
-    private int Id;
+    private String UserPhone;
     private String ProductId;
     private String ProductName;
     private String Quantity;
@@ -12,7 +12,8 @@ public class Order {
     public Order() {
     }
 
-    public Order(String productId, String productName, String quantity, String price, String discount,String image) {
+    public Order(String userPhone, String productId, String productName, String quantity, String price, String discount, String image) {
+        UserPhone = userPhone;
         ProductId = productId;
         ProductName = productName;
         Quantity = quantity;
@@ -21,25 +22,12 @@ public class Order {
         Image = image;
     }
 
-    public Order(int id, String productId, String productName, String quantity, String price, String discount, String image) {
-        Id = id;
-        ProductId = productId;
-        ProductName = productName;
-        Quantity = quantity;
-        Price = price;
-        Discount = discount;
-        Image = image;
-
+    public String getUserPhone() {
+        return UserPhone;
     }
 
-
-
-    public int getId() {
-        return Id;
-    }
-
-    public void setId(int id) {
-        Id = id;
+    public void setUserPhone(String userPhone) {
+        UserPhone = userPhone;
     }
 
     public String getProductId() {

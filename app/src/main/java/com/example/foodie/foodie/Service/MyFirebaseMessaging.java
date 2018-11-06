@@ -18,38 +18,55 @@ import com.example.foodie.foodie.R;
 import com.google.firebase.messaging.FirebaseMessagingService;
 import com.google.firebase.messaging.RemoteMessage;
 
+import java.util.Map;
 import java.util.Random;
 
 public class MyFirebaseMessaging extends FirebaseMessagingService {
     @Override
     public void onMessageReceived(RemoteMessage remoteMessage) {
         super.onMessageReceived(remoteMessage);
-        if(Build.VERSION.SDK_INT >= Build.VERSION_CODES.O)
-            sendNotificationAPI26(remoteMessage);
-        else
-            sendNotification(remoteMessage);
+        if(remoteMessage.getData() != null) {
+            if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O)
+                sendNotificationAPI26(remoteMessage);
+            else
+                sendNotification(remoteMessage);
+        }
     }
 
     private void sendNotificationAPI26(RemoteMessage remoteMessage) {
-        RemoteMessage.Notification notification = remoteMessage.getNotification();
-        String title = notification.getTitle();
-        String content = notification.getBody();
+        Map<String, String> data = remoteMessage.getData();
+        String title = data.get("title");
+        String message = data.get("message");
+
+        PendingIntent pendingIntent;
+        NotificationHelper helper;
+        Notification.Builder builder;
 
         //Here we will fix to click to notification -> go to order list
-        Intent intent = new Intent(this, OrderStatus.class);
-        intent.putExtra(Common.PHONE_TEXT, Common.currentUser.getPhone());
-        intent.addFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP);
-        PendingIntent pendingIntent = PendingIntent.getActivity(this,0,intent,PendingIntent.FLAG_ONE_SHOT);
-        Uri defaultSoundUri = RingtoneManager.getDefaultUri(RingtoneManager.TYPE_NOTIFICATION);
+        if (Common.currentUser != null) {
+            Intent intent = new Intent(this, OrderStatus.class);
+            intent.putExtra(Common.PHONE_TEXT, Common.currentUser.getPhone());
+            intent.addFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP);
+            pendingIntent = PendingIntent.getActivity(this, 0, intent, PendingIntent.FLAG_ONE_SHOT);
+            Uri defaultSoundUri = RingtoneManager.getDefaultUri(RingtoneManager.TYPE_NOTIFICATION);
 
-        NotificationHelper helper = new NotificationHelper(this);
-        Notification.Builder builder = helper.getFoodieChannelNotification(title,content,pendingIntent,defaultSoundUri);
-        //Generate random id for notification to show all notification
-        helper.getManager().notify(new Random().nextInt(),builder.build());
+            helper = new NotificationHelper(this);
+            builder = helper.getFoodieChannelNotification(title, message, pendingIntent, defaultSoundUri);
+            //Generate random id for notification to show all notification
+            helper.getManager().notify(new Random().nextInt(), builder.build());
+        } else {
+            Uri defaultSoundUri = RingtoneManager.getDefaultUri(RingtoneManager.TYPE_NOTIFICATION);
+            helper = new NotificationHelper(this);
+            builder = helper.getFoodieChannelNotification(title, message, defaultSoundUri);
+        }
     }
 
     private void sendNotification(RemoteMessage remoteMessage){
-        RemoteMessage.Notification notification = remoteMessage.getNotification();
+
+        Map<String,String> data = remoteMessage.getData();
+        String title = data.get("title");
+        String message = data.get("message");
+
         Intent intent = new Intent(this, MainActivity.class);
         intent.addFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP);
         PendingIntent pendingIntent = PendingIntent.getActivity(this,0,intent,PendingIntent.FLAG_ONE_SHOT);
@@ -57,8 +74,8 @@ public class MyFirebaseMessaging extends FirebaseMessagingService {
         Uri defaultSoundUri = RingtoneManager.getDefaultUri(RingtoneManager.TYPE_NOTIFICATION);
         NotificationCompat.Builder builder = new NotificationCompat.Builder(this)
                 .setSmallIcon(R.mipmap.ic_launcher_round)
-                .setContentTitle(notification.getTitle())
-                .setContentTitle(notification.getBody())
+                .setContentTitle(title)
+                .setContentTitle(message)
                 .setAutoCancel(true)
                 .setSound(defaultSoundUri)
                 .setContentIntent(pendingIntent);

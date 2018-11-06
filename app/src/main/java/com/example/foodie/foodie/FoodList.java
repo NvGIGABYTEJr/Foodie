@@ -263,7 +263,7 @@ public class FoodList extends AppCompatActivity {
     }
 
     private void loadSuggest(){
-        foodList.orderByChild("MenuId").equalTo(categoryId).addValueEventListener(new ValueEventListener() {
+        foodList.orderByChild("menuId").equalTo(categoryId).addValueEventListener(new ValueEventListener() {
             @Override
             public void onDataChange(@NonNull DataSnapshot dataSnapshot) {
                 for(DataSnapshot postSnapshot:dataSnapshot.getChildren()){
@@ -283,7 +283,7 @@ public class FoodList extends AppCompatActivity {
     private void loadListFood(String categoryId){
 
         //Create query by category Id
-        Query searchByName = foodList.orderByChild("MenuId").equalTo(categoryId);
+        Query searchByName = foodList.orderByChild("menuId").equalTo(categoryId);
         //Create options with query
         FirebaseRecyclerOptions<Food> foodOptions = new FirebaseRecyclerOptions.Builder<Food>()
                 .setQuery(searchByName,Food.class)
@@ -297,24 +297,31 @@ public class FoodList extends AppCompatActivity {
                 Picasso.with(getBaseContext()).load(model.getImage()).into(viewHolder.food_image);
 
                 //Quick cart
-                viewHolder.quick_cart.setOnClickListener(new View.OnClickListener() {
-                    @Override
-                    public void onClick(View v) {
-                        new Database(getBaseContext()).addToCart(new Order(
-                                adapter.getRef(position).getKey(),
-                                model.getName(),
-                                "1",
-                                model.getPrice(),
-                                model.getDiscount(),
-                                model.getImage()
-                        ));
+                    viewHolder.quick_cart.setOnClickListener(new View.OnClickListener() {
+                        @Override
+                        public void onClick(View v) {
+                            boolean isExists =new Database(getBaseContext()).checkFoodExists(adapter.getRef(position).getKey(),Common.currentUser.getPhone());
+                            if(!isExists) {
+                                new Database(getBaseContext()).addToCart(new Order(
+                                        Common.currentUser.getPhone(),
+                                        adapter.getRef(position).getKey(),
+                                        model.getName(),
+                                        "1",
+                                        model.getPrice(),
+                                        model.getDiscount(),
+                                        model.getImage()
+                                ));
+                            } else {
+                                new Database(getBaseContext()).increaseCart(Common.currentUser.getPhone(),adapter.getRef(position).getKey());
+                            }
 
-                        Toast.makeText(FoodList.this,"Added to Cart",Toast.LENGTH_SHORT).show();
-                    }
-                });
+                            Toast.makeText(FoodList.this, "Added to Cart", Toast.LENGTH_SHORT).show();
+                        }
+                    });
+
 
                 //Add Favourites
-                if(localDB.isFavourite(adapter.getRef(position).getKey()))
+                if(localDB.isFavourite(adapter.getRef(position).getKey(),Common.currentUser.getPhone()))
                     viewHolder.fav_image.setImageResource(R.drawable.ic_favorite_black_24dp);
 
                 //Click to share
@@ -336,13 +343,13 @@ public class FoodList extends AppCompatActivity {
 
                     @Override
                     public void onClick(View v) {
-                        if(!localDB.isFavourite(adapter.getRef(position).getKey())){
-                            localDB.addToFavourites(adapter.getRef(position).getKey());
+                        if(!localDB.isFavourite(adapter.getRef(position).getKey(),Common.currentUser.getPhone())){
+                            localDB.addToFavourites(adapter.getRef(position).getKey(),Common.currentUser.getPhone());
                             viewHolder.fav_image.setImageResource(R.drawable.ic_favorite_black_24dp);
                             Toast.makeText(FoodList.this, ""+model.getName()+" was added to Favorites", Toast.LENGTH_SHORT).show();
                         }
                         else {
-                            localDB.removeFromFavourites(adapter.getRef(position).getKey());
+                            localDB.removeFromFavourites(adapter.getRef(position).getKey(),Common.currentUser.getPhone());
                             viewHolder.fav_image.setImageResource(R.drawable.ic_favorite_border_black_24dp);
                             Toast.makeText(FoodList.this, ""+model.getName()+" was removed from Favorites", Toast.LENGTH_SHORT).show();
                         }
@@ -377,6 +384,8 @@ public class FoodList extends AppCompatActivity {
     protected void onStop() {
         super.onStop();
         adapter.stopListening();
-        //searchAdapter.stopListening();
+        if(searchAdapter != null) {
+            searchAdapter.stopListening();
+        }
     }
 }

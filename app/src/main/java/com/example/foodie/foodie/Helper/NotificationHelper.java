@@ -55,4 +55,15 @@ public class NotificationHelper extends ContextWrapper {
                 .setSound(soundUri)
                 .setAutoCancel(false);
     }
+
+    @TargetApi(Build.VERSION_CODES.O)
+    public android.app.Notification.Builder getFoodieChannelNotification(String title, String body,
+                                                                         Uri soundUri){
+        return new android.app.Notification.Builder(getApplicationContext(),UTP_CHANNEL_ID)
+                .setContentTitle(title)
+                .setContentText(body)
+                .setSmallIcon(R.mipmap.ic_launcher)
+                .setSound(soundUri)
+                .setAutoCancel(false);
+    }
 }

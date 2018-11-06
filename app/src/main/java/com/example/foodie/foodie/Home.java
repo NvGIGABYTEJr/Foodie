@@ -131,7 +131,7 @@ public class Home extends AppCompatActivity
             }
         });
 
-        fab.setCount(new Database(this).getCountCart());
+        fab.setCount(new Database(this).getCountCart(Common.currentUser.getPhone()));
 
         setSupportActionBar(toolbar);
 
@@ -215,7 +215,7 @@ public class Home extends AppCompatActivity
     @Override
     protected void onResume() {
         super.onResume();
-        fab.setCount(new Database(this).getCountCart());
+        fab.setCount(new Database(this).getCountCart(Common.currentUser.getPhone()));
 
         if(adapter != null)
             adapter.startListening();
