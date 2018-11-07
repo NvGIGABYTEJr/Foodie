@@ -140,9 +140,9 @@ public class MainActivity extends AppCompatActivity{
                         user.setPhone(Phone);
 
                         if (user.getPassword().equals(Password)) {
-                            Intent homeIntent = new Intent(MainActivity.this,Home.class);
+                            Intent restaurantIntent = new Intent(MainActivity.this,RestaurantList.class);
                             Common.currentUser = user;
-                            startActivity(homeIntent);
+                            startActivity(restaurantIntent);
                             Toast.makeText(MainActivity.this, "Sign In Successful !", Toast.LENGTH_SHORT).show();
                             finish();
 

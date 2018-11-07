@@ -32,7 +32,7 @@ dependencies {
     implementation 'uk.co.chrisjenx:calligraphy:2.3.0'
 
     //FacebookShare
-    implementation ('com.facebook.android:facebook-share:[4,5)')
+    implementation('com.facebook.android:facebook-share:[4,5)')
 
     //Firebase library
     implementation 'com.google.firebase:firebase-messaging:11.6.2'
@@ -73,8 +73,6 @@ dependencies {
     testImplementation 'junit:junit:4.12'
     androidTestImplementation 'com.android.support.test:runner:1.0.1'
     androidTestImplementation 'com.android.support.test.espresso:espresso-core:3.0.1'
-
-
 
 
 }

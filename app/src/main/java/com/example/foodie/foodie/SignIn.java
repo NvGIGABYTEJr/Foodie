@@ -94,9 +94,9 @@ public class SignIn extends AppCompatActivity{
                             user.setPhone(edtPhone.getText().toString());
 
                             if (user.getPassword().equals(edtPassword.getText().toString())) {
-                                Intent homeIntent = new Intent(SignIn.this,Home.class);
+                                Intent restaurantIntent = new Intent(SignIn.this,RestaurantList.class);
                                 Common.currentUser = user;
-                                startActivity(homeIntent);
+                                startActivity(restaurantIntent);
                                 Toast.makeText(SignIn.this, "Sign In Successful !", Toast.LENGTH_SHORT).show();
                                 finish();
 

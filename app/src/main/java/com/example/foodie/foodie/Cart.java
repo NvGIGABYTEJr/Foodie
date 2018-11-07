@@ -163,7 +163,7 @@ public class Cart extends AppCompatActivity implements GoogleApiClient.Connectio
         mService = Common.getFCMService();
 
         database = FirebaseDatabase.getInstance();
-        requests = database.getReference("Requests");
+        requests = database.getReference("Restaurants").child(Common.restaurantSelected).child("Requests");
 
         recyclerView = (RecyclerView) findViewById(R.id.listCart);
         recyclerView.setHasFixedSize(true);
@@ -380,6 +380,7 @@ public class Cart extends AppCompatActivity implements GoogleApiClient.Connectio
                             "COD",
                             "Unpaid",
                             String.format("%s,%s",shippingAddress.getLatLng().latitude,shippingAddress.getLatLng().longitude),
+                            Common.restaurantSelected,
                             cart
                     );
                     //Submit to Firebase
@@ -461,6 +462,7 @@ public class Cart extends AppCompatActivity implements GoogleApiClient.Connectio
                                 "Paypal",
                                 jsonObject.getJSONObject("response").getString("state"),
                                 String.format("%s,%s",shippingAddress.getLatLng().latitude,shippingAddress.getLatLng().longitude),
+                                Common.restaurantSelected,
                                 cart
                         );
                         //Submit to Firebase
