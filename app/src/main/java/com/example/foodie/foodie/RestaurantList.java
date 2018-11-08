@@ -80,7 +80,7 @@ public class RestaurantList extends AppCompatActivity {
             public void onRefresh() {
                 if (Common.isConnectedToInternet(getBaseContext()))
                     loadRestaurant();
-                Toast.makeText(getBaseContext(), "Please check your connection !!", Toast.LENGTH_SHORT).show();
+                //Toast.makeText(getBaseContext(), "Please check your connection !!", Toast.LENGTH_SHORT).show();
                 return;
             }
         });
