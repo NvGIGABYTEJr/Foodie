@@ -354,7 +354,6 @@ public class Cart extends AppCompatActivity implements GoogleApiClient.Connectio
                             .commit();
                     return;
                 }
-                address = shippingAddress.getAddress().toString();
                 comment = edtComment.getText().toString();
 
                 //Check payment method
@@ -386,7 +385,6 @@ public class Cart extends AppCompatActivity implements GoogleApiClient.Connectio
                             comment,
                             "COD",
                             "Unpaid",
-                            String.format("%s,%s",shippingAddress.getLatLng().latitude,shippingAddress.getLatLng().longitude),
                             Common.restaurantSelected,
                             cart
                     );
@@ -421,7 +419,6 @@ public class Cart extends AppCompatActivity implements GoogleApiClient.Connectio
                                     comment,
                                     "Reward Cash Wallet",
                                     "Paid",
-                                    String.format("%s,%s",shippingAddress.getLatLng().latitude,shippingAddress.getLatLng().longitude),
                                     Common.restaurantSelected,
                                     cart
                             );
@@ -538,7 +535,6 @@ public class Cart extends AppCompatActivity implements GoogleApiClient.Connectio
                                 comment,
                                 "Paypal",
                                 jsonObject.getJSONObject("response").getString("state"),
-                                String.format("%s,%s",shippingAddress.getLatLng().latitude,shippingAddress.getLatLng().longitude),
                                 Common.restaurantSelected,
                                 cart
                         );
