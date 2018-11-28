@@ -125,4 +125,12 @@ public class RestaurantList extends AppCompatActivity {
 
     }
 
+    @Override
+    protected void onResume() {
+        super.onResume();
+        if (adapter != null) {
+            adapter.startListening();
+        }
+    }
+
 }
