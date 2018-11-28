@@ -403,7 +403,7 @@ public class Cart extends AppCompatActivity implements GoogleApiClient.Connectio
                     finish();
                 } else if (rdiRewardCash.isChecked()){
 
-                    //if (Common.currentUser.getIsStaff() == "true") {
+                    if (Boolean.parseBoolean(Common.currentUser.getIsStaff())){
                         double amount = 0;
                         try {
                             Locale mys = new Locale("en", "MY");
@@ -467,9 +467,9 @@ public class Cart extends AppCompatActivity implements GoogleApiClient.Connectio
                         } else {
                             Toast.makeText(Cart.this, "You have insufficient balance, please choose other payment", Toast.LENGTH_SHORT).show();
                         }
-/*                    } else {
+                    } else {
                         Toast.makeText(Cart.this, "Sorry you are not eligible to you this payment method", Toast.LENGTH_SHORT).show();
-                    }*/
+                    }
 
                 }
 
