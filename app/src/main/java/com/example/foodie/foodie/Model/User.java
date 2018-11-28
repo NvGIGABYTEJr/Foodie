@@ -7,6 +7,7 @@ public class User {
     private String IsStaff;
     private String secureCode;
     private String homeAddress;
+    private Double rewardCash;
 
     public User() {
     }
@@ -16,6 +17,14 @@ public class User {
         Password = password;
         IsStaff = "false";
         this.secureCode = secureCode;
+    }
+
+    public Double getRewardCash() {
+        return rewardCash;
+    }
+
+    public void setRewardCash(Double rewardCash) {
+        this.rewardCash = rewardCash;
     }
 
     public String getIsStaff() {

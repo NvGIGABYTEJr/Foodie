@@ -50,7 +50,8 @@ public class OrderStatus extends AppCompatActivity {
         setContentView(R.layout.activity_order_status);
 
         database = FirebaseDatabase.getInstance();
-        requests = database.getReference("Requests");
+        //requests = database.getReference("Requests");
+        requests = database.getReference("Restaurants").child(Common.restaurantSelected).child("Requests");
 
         recyclerView = (RecyclerView)findViewById(R.id.listOrders);
         recyclerView.setHasFixedSize(true);

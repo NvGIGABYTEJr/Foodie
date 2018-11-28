@@ -6,6 +6,7 @@ import android.content.Context;
 import android.content.DialogInterface;
 import android.content.Intent;
 import android.content.pm.PackageManager;
+import android.content.res.Configuration;
 import android.location.Location;
 import android.support.annotation.NonNull;
 import android.support.annotation.Nullable;
@@ -35,6 +36,7 @@ import com.example.foodie.foodie.Model.MyResponse;
 import com.example.foodie.foodie.Model.Order;
 import com.example.foodie.foodie.Model.Request;
 import com.example.foodie.foodie.Model.Token;
+import com.example.foodie.foodie.Model.User;
 import com.example.foodie.foodie.Remote.APIService;
 import com.example.foodie.foodie.Remote.IGoogleService;
 import com.example.foodie.foodie.ViewHolder.CartAdapter;
@@ -48,6 +50,8 @@ import com.google.android.gms.location.LocationServices;
 import com.google.android.gms.location.places.Place;
 import com.google.android.gms.location.places.ui.PlaceAutocompleteFragment;
 import com.google.android.gms.location.places.ui.PlaceSelectionListener;
+import com.google.android.gms.tasks.OnCompleteListener;
+import com.google.android.gms.tasks.Task;
 import com.google.firebase.database.DataSnapshot;
 import com.google.firebase.database.DatabaseError;
 import com.google.firebase.database.DatabaseReference;
@@ -68,6 +72,7 @@ import org.json.JSONObject;
 
 import java.math.BigDecimal;
 import java.text.NumberFormat;
+import java.text.ParseException;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
@@ -135,7 +140,6 @@ public class Cart extends AppCompatActivity implements GoogleApiClient.Connectio
         .setDefaultFontPath("fonts/KGSkinnyLatte.ttf")
         .setFontAttrId(R.attr.fontPath)
         .build());
-
         setContentView(R.layout.activity_cart);
 
         //Init
@@ -256,6 +260,9 @@ public class Cart extends AppCompatActivity implements GoogleApiClient.Connectio
         //final RadioButton rdiHomeAddress = (RadioButton) order_address_comment.findViewById(R.id.rdiHomeAddress);
         final RadioButton rdiCOD = (RadioButton) order_address_comment.findViewById(R.id.rdiCOD);
         final RadioButton rdiPaypal = (RadioButton) order_address_comment.findViewById(R.id.rdiPaypal);
+        //disable paypal, remove this if you want to enable paypal
+        rdiPaypal.setVisibility(View.INVISIBLE);
+        final RadioButton rdiRewardCash = (RadioButton) order_address_comment.findViewById(R.id.rdiRewardCash);
 
         //Checkbox
         final CheckBox rdiHomeAddress = (CheckBox) order_address_comment.findViewById(R.id.rdiHomeAddress);
@@ -351,7 +358,7 @@ public class Cart extends AppCompatActivity implements GoogleApiClient.Connectio
                 comment = edtComment.getText().toString();
 
                 //Check payment method
-                if (!rdiCOD.isChecked() && !rdiPaypal.isChecked()){
+                if (!rdiCOD.isChecked() && !rdiPaypal.isChecked() && !rdiRewardCash.isChecked()){
                     Toast.makeText(Cart.this,"Please select payment option",Toast.LENGTH_SHORT).show();
                     getFragmentManager().beginTransaction()
                             .remove(getFragmentManager().findFragmentById(R.id.place_autocomplete_fragment))
@@ -394,6 +401,76 @@ public class Cart extends AppCompatActivity implements GoogleApiClient.Connectio
 
                     Toast.makeText(Cart.this, "Thank you, Order Placed", Toast.LENGTH_SHORT).show();
                     finish();
+                } else if (rdiRewardCash.isChecked()){
+
+                    //if (Common.currentUser.getIsStaff() == "true") {
+                        double amount = 0;
+                        try {
+                            Locale mys = new Locale("en", "MY");
+                            amount = Common.formatCurrency(txtTotalPrice.getText().toString(), mys).doubleValue();
+                        } catch (ParseException e) {
+                            e.printStackTrace();
+                        }
+                        if(Common.currentUser.getRewardCash() >= amount){
+                            Request request = new Request (
+                                    Common.currentUser.getPhone(),
+                                    Common.currentUser.getName(),
+                                    address,
+                                    txtTotalPrice.getText().toString(),
+                                    "0",
+                                    comment,
+                                    "Reward Cash Wallet",
+                                    "Paid",
+                                    String.format("%s,%s",shippingAddress.getLatLng().latitude,shippingAddress.getLatLng().longitude),
+                                    Common.restaurantSelected,
+                                    cart
+                            );
+                            //Submit to Firebase
+                            //We will using System.CurrenMilli as key
+                            final String order_number = String.valueOf(System.currentTimeMillis());
+                            requests.child(order_number)
+                                    .setValue(request);
+                            //Delete Cart
+                            new Database(getBaseContext()).cleanCart(Common.currentUser.getPhone());
+                            double balance = Common.currentUser.getRewardCash() - amount;
+                            Map<String,Object> update_balance = new HashMap<>();
+                            update_balance.put("rewardCash",balance);
+
+                            FirebaseDatabase.getInstance()
+                                    .getReference("User")
+                                    .child(Common.currentUser.getPhone())
+                                    .updateChildren(update_balance)
+                                    .addOnCompleteListener(new OnCompleteListener<Void>() {
+                                        @Override
+                                        public void onComplete(@NonNull Task<Void> task) {
+                                            if(task.isSuccessful()){
+                                                FirebaseDatabase.getInstance()
+                                                        .getReference("User")
+                                                        .child(Common.currentUser.getPhone())
+                                                        .addListenerForSingleValueEvent(new ValueEventListener() {
+                                                            @Override
+                                                            public void onDataChange(DataSnapshot dataSnapshot) {
+                                                                Common.currentUser = dataSnapshot.getValue(User.class);
+                                                                sendNotificationOrder(order_number);
+                                                            }
+
+                                                            @Override
+                                                            public void onCancelled(DatabaseError databaseError) {
+
+                                                            }
+                                                        });
+                                            }
+                                        }
+                                    });
+
+
+                        } else {
+                            Toast.makeText(Cart.this, "You have insufficient balance, please choose other payment", Toast.LENGTH_SHORT).show();
+                        }
+/*                    } else {
+                        Toast.makeText(Cart.this, "Sorry you are not eligible to you this payment method", Toast.LENGTH_SHORT).show();
+                    }*/
+
                 }
 
 
@@ -503,7 +580,7 @@ public class Cart extends AppCompatActivity implements GoogleApiClient.Connectio
                     Sender content = new Sender(serverToken.getToken(),notification);*/
                     Map<String,String> dataSend = new HashMap<>();
                     dataSend.put("title","UTP");
-                    dataSend.put("message","You have new order" + order_number);
+                    dataSend.put("message","You have new order " + order_number);
                     DataMessage dataMessage = new DataMessage(serverToken.getToken(),dataSend);
 
                     String test = new Gson().toJson(dataMessage);

@@ -319,7 +319,7 @@ public class Home extends AppCompatActivity
                         .addOnCompleteListener(new OnCompleteListener<Void>() {
                             @Override
                             public void onComplete(@NonNull Task<Void> task) {
-                                Toast.makeText(Home.this,"Update Password Successful",Toast.LENGTH_SHORT).show();
+                                Toast.makeText(Home.this,"Updated Home Address",Toast.LENGTH_SHORT).show();
                             }
                         }) ;
             }
