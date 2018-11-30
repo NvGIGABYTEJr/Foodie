@@ -263,6 +263,9 @@ public class Cart extends AppCompatActivity implements GoogleApiClient.Connectio
         //disable paypal, remove this if you want to enable paypal
         rdiPaypal.setVisibility(View.INVISIBLE);
         final RadioButton rdiRewardCash = (RadioButton) order_address_comment.findViewById(R.id.rdiRewardCash);
+        final TextView edtRewardCashBalance = (TextView) order_address_comment.findViewById(R.id.cashReward_balance);
+        edtRewardCashBalance.setText("RM "+Common.currentUser.getRewardCash().toString());
+
 
         //Checkbox
         final CheckBox rdiHomeAddress = (CheckBox) order_address_comment.findViewById(R.id.rdiHomeAddress);
@@ -402,6 +405,7 @@ public class Cart extends AppCompatActivity implements GoogleApiClient.Connectio
                 } else if (rdiRewardCash.isChecked()){
 
                     if (Boolean.parseBoolean(Common.currentUser.getIsStaff())){
+
                         double amount = 0;
                         try {
                             Locale mys = new Locale("en", "MY");
